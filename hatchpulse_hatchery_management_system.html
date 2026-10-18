@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HatchPulse - Smart Hatchery Management Engine</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card-hover {
+            transition: all 0.2s ease-in-out;
+        }
+        .glass-card-hover:hover {
+            border-color: rgba(245, 158, 11, 0.4);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-950 text-slate-100 antialiased selection:bg-amber-500 selection:text-slate-950">
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 flex items-center justify-center text-slate-950 font-black shadow-lg shadow-amber-500/20 ring-2 ring-amber-400/30">
+                    <i data-lucide="activity" class="w-6 h-6 stroke-[2.5]"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-xl tracking-tight bg-gradient-to-r from-white via-slate-100 to-amber-300 bg-clip-text text-transparent">HatchPulse</span>
+                        <span class="bg-amber-500/10 text-amber-400 border border-amber-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full tracking-wide uppercase">v3.0 SaaS</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 hidden sm:block">Intelligent Hatchery Operations & Analytics Engine</p>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-3">
+                <!-- System Status Indicator -->
+                <div class="hidden md:flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-full border border-slate-700/80 text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-slate-300 font-medium">IoT Telemetry Online</span>
+                </div>
+
+                <button onclick="toggleModal('helpModal')" class="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 transition">
+                    <i data-lucide="help-circle" class="w-4 h-4"></i>
+                    <span class="hidden sm:inline">Guide & How-To</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Shell -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-6">
+
+        <!-- Navigation Tabs -->
+        <nav class="flex items-center gap-2 overflow-x-auto pb-2 border-b border-slate-800 custom-scrollbar">
+            <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap bg-amber-500 text-slate-950 shadow-md shadow-amber-500/10">
+                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                Dashboard Overview
+            </button>
+            <button onclick="switchTab('intake')" id="tab-intake" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                <i data-lucide="egg" class="w-4 h-4"></i>
+                1. Egg Intake & Suppliers
+            </button>
+            <button onclick="switchTab('incubation')" id="tab-incubation" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                <i data-lucide="thermometer" class="w-4 h-4"></i>
+                2. Incubation & IoT Monitor
+            </button>
+            <button onclick="switchTab('biosecurity')" id="tab-biosecurity" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                3. Quality & Biosecurity
+            </button>
+            <button onclick="switchTab('dispatch')" id="tab-dispatch" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                <i data-lucide="truck" class="w-4 h-4"></i>
+                4. Sales & Perishable Dispatch
+            </button>
+            <button onclick="switchTab('finance')" id="tab-finance" class="nav-tab flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition whitespace-nowrap text-slate-400 hover:text-slate-200 hover:bg-slate-800/60">
+                <i data-lucide="calculator" class="w-4 h-4"></i>
+                5. Cost & Profit Engine
+            </button>
+        </nav>
+
+        <!-- TAB 0: DASHBOARD OVERVIEW -->
+        <div id="content-dashboard" class="tab-content space-y-6">
+            <!-- Key Metric Overview Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-card p-5 rounded-2xl flex flex-col justify-between glass-card-hover">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Batches</span>
+                        <div class="p-2 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20"><i data-lucide="layers" class="w-5 h-5"></i></div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold text-white" id="dash-active-count">3</div>
+                        <p class="text-xs text-slate-400 mt-1">Active in incubator setters/hatchers</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl flex flex-col justify-between glass-card-hover">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Incubator Telemetry</span>
+                        <div class="p-2 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20"><i data-lucide="gauge" class="w-5 h-5"></i></div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl font-extrabold text-white" id="dash-telemetry-text">37.5°C / 55%</span>
+                            <span id="dash-telemetry-badge" class="px-2 py-0.5 text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full">Optimal</span>
+                        </div>
+                        <p class="text-xs text-slate-400 mt-1">Live setter climate feedback</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl flex flex-col justify-between glass-card-hover">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hatched Chicks Ready</span>
+                        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20"><i data-lucide="check-circle-2" class="w-5 h-5"></i></div>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold text-emerald-400" id="dash-chicks-ready">8,700</div>
+                        <p class="text-xs text-slate-400 mt-1">Available for 12h dispatch window</p>
+                    </div>
+                </div>
+
+                <div class="glass-card p-5 rounded-2xl flex flex-col justify-between glass-card-hover">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Estimated Profit Margin</span>
+                        <span class="p-2 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20"><i data-lucide="trending-up" class="w-5 h-5"></i></span>
+                    </div>
+                    <div>
+                        <div class="text-3xl font-extrabold text-white" id="dash-profit-margin">34.7%</div>
+                        <p class="text-xs text-slate-400 mt-1">Auto-blended unit unit costs</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Launch Toolbar -->
+            <div class="bg-gradient-to-r from-amber-500 to-amber-600 rounded-2xl p-6 text-slate-950 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-black flex items-center gap-2 tracking-tight">
+                        <i data-lucide="zap" class="w-6 h-6 stroke-[2.5]"></i> HatchPulse Quick Command Center
+                    </h2>
+                    <p class="text-xs font-medium text-slate-900 mt-0.5">Streamline day-to-day egg receiving, candling, and dispatch logs.</p>
+                </div>
+                <div class="flex flex-wrap gap-2.5 w-full md:w-auto">
+                    <button onclick="switchTab('intake')" class="bg-slate-950 text-amber-400 hover:bg-slate-900 px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 border border-amber-400/30 shadow">
+                        <i data-lucide="plus-circle" class="w-4 h-4"></i> Receive Egg Shipment
+                    </button>
+                    <button onclick="switchTab('incubation')" class="bg-amber-400 hover:bg-amber-300 text-slate-950 px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 shadow">
+                        <i data-lucide="sliders" class="w-4 h-4"></i> Adjust Incubator Climate
+                    </button>
+                    <button onclick="switchTab('dispatch')" class="bg-slate-950 text-amber-400 hover:bg-slate-900 px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center gap-2 border border-amber-400/30 shadow">
+                        <i data-lucide="shopping-bag" class="w-4 h-4"></i> Book Chick Order
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Batches Overview -->
+            <div class="glass-card rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <h3 class="font-bold text-white text-base flex items-center gap-2">
+                        <i data-lucide="flame" class="w-5 h-5 text-amber-400"></i> Active Incubation Batches Lifecycle
+                    </h3>
+                    <button onclick="switchTab('incubation')" class="text-xs font-semibold text-amber-400 hover:underline flex items-center gap-1">
+                        Full Monitor <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+
+                <div id="dash-batches-container" class="space-y-3">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 1: EGG INTAKE & SUPPLIERS -->
+        <div id="content-intake" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Intake Form -->
+                <div class="glass-card p-6 rounded-2xl space-y-4 lg:col-span-1 border-slate-800">
+                    <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+                            <i data-lucide="package-plus" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white">Receive Egg Shipment</h3>
+                            <p class="text-xs text-slate-400">Log incoming breeder flock batch</p>
+                        </div>
+                    </div>
+
+                    <form id="intake-form" onsubmit="handleIntakeSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Batch Code / Lot No.</label>
+                            <input type="text" id="intake-batch-id" required placeholder="e.g. HP-2026-B8" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Breeder Supplier / Farm</label>
+                            <input type="text" id="intake-supplier" required placeholder="e.g. Heritage Parent Stock Ltd." class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Flock Age (Weeks)</label>
+                                <input type="number" id="intake-flock-age" value="36" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Total Received</label>
+                                <input type="number" id="intake-total-eggs" oninput="calculateUsableEggs()" value="6000" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <!-- Quality Filter / Grading -->
+                        <div class="p-3 bg-red-500/5 border border-red-500/20 rounded-xl space-y-3">
+                            <span class="text-xs font-bold text-red-400 block flex items-center gap-1.5">
+                                <i data-lucide="filter" class="w-3.5 h-3.5"></i> Quality Filter (Rejection Sorting)
+                            </span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[11px] text-slate-400">Cracked Eggs</label>
+                                    <input type="number" id="intake-cracked" oninput="calculateUsableEggs()" value="50" class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] text-slate-400">Deformed / Dirty</label>
+                                    <input type="number" id="intake-dirty" oninput="calculateUsableEggs()" value="40" class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-xs text-white">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Net Usable Preview -->
+                        <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center justify-between">
+                            <div>
+                                <div class="text-xs font-bold text-emerald-400">Net Usable Setter Eggs</div>
+                                <div class="text-[11px] text-slate-400">Approved for Traying</div>
+                            </div>
+                            <div class="text-2xl font-black text-emerald-400" id="intake-usable-count">5,910</div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl shadow-lg shadow-amber-500/10 transition text-xs flex items-center justify-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4"></i> Save Batch & Load into Setter
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Intake Logs Table -->
+                <div class="glass-card p-6 rounded-2xl lg:col-span-2 border-slate-800 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <div>
+                                <h3 class="font-bold text-white">Egg Intake & Breeder Logs</h3>
+                                <p class="text-xs text-slate-400">Tracked incoming parent stock shipments</p>
+                            </div>
+                            <span class="text-xs text-amber-400 font-medium">Auto-Graded</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="uppercase text-slate-400 border-b border-slate-800 font-semibold">
+                                        <th class="pb-2">Batch Code</th>
+                                        <th class="pb-2">Supplier Farm</th>
+                                        <th class="pb-2 text-right">Received</th>
+                                        <th class="pb-2 text-right">Usable Eggs</th>
+                                        <th class="pb-2 text-center">Rejection Rate</th>
+                                        <th class="pb-2 text-right">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="intake-table-body" class="divide-y divide-slate-800/60">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-slate-900/60 border border-slate-800 rounded-xl text-xs text-slate-400 flex items-center gap-2">
+                        <i data-lucide="shield-alert" class="w-4 h-4 text-amber-400 flex-shrink-0"></i>
+                        <span>Batches with rejection rates over 2.5% automatically log a supplier quality warning flag.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: INCUBATION & IOT MONITOR -->
+        <div id="content-incubation" class="tab-content hidden space-y-6">
+            <!-- Master IoT Telemetry Deck -->
+            <div class="glass-card p-6 rounded-2xl border-amber-500/30 bg-gradient-to-br from-slate-900 to-slate-950 flex flex-col lg:flex-row items-center justify-between gap-6 shadow-xl">
+                <div class="space-y-1 text-center lg:text-left">
+                    <div class="flex items-center justify-center lg:justify-start gap-2">
+                        <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+                        <h3 class="text-lg font-bold text-white">Live IoT Incubator Telemetry Hub</h3>
+                    </div>
+                    <p class="text-xs text-slate-400">Real-time API simulator for Setter #1 and Hatcher #2 sensor nodes</p>
+                </div>
+
+                <!-- Climate Control Sliders / Buttons -->
+                <div class="flex flex-wrap items-center gap-6 bg-slate-900/90 p-4 rounded-xl border border-slate-800 w-full lg:w-auto justify-around">
+                    <div class="text-center">
+                        <div class="text-xs text-slate-400 mb-1 font-semibold">Temperature Target: ~37.5°C</div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="adjustTemp(-0.5)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition">-</button>
+                            <span id="telemetry-temp-val" class="text-2xl font-black text-amber-400 min-w-[70px]">37.5°C</span>
+                            <button onclick="adjustTemp(0.5)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition">+</button>
+                        </div>
+                    </div>
+
+                    <div class="h-10 w-px bg-slate-800 hidden sm:block"></div>
+
+                    <div class="text-center">
+                        <div class="text-xs text-slate-400 mb-1 font-semibold">Humidity Target: 55%</div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="adjustHumidity(-5)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition">-</button>
+                            <span id="telemetry-hum-val" class="text-2xl font-black text-blue-400 min-w-[60px]">55%</span>
+                            <button onclick="adjustHumidity(5)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-bold text-sm transition">+</button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <button onclick="resetTelemetry()" class="text-xs text-slate-400 hover:text-amber-400 underline block text-center font-medium">Reset Optimal</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Telemetry Banner -->
+            <div id="telemetry-alert-banner" class="hidden p-4 rounded-xl border flex items-center gap-3">
+                <i data-lucide="alert-triangle" class="w-5 h-5 flex-shrink-0"></i>
+                <div id="telemetry-alert-text" class="text-xs font-semibold"></div>
+            </div>
+
+            <!-- Active Incubator Batches Lifecycle Bar -->
+            <div class="space-y-4">
+                <h3 class="font-bold text-white text-base flex items-center gap-2">
+                    <i data-lucide="calendar-range" class="w-5 h-5 text-amber-400"></i> 21-Day Incubation Batch Visual Tracker
+                </h3>
+                <div id="incubation-batches-container" class="space-y-4">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+            <!-- Candling Inspection Deck -->
+            <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                    <div>
+                        <h3 class="font-bold text-white">Day 7 & Day 14 Candling Inspection Log</h3>
+                        <p class="text-xs text-slate-400">Shine candling lamps to identify infertile or clear eggs early</p>
+                    </div>
+                    <span class="p-2 bg-purple-500/10 text-purple-400 rounded-xl border border-purple-500/20"><i data-lucide="lamp" class="w-4 h-4"></i></span>
+                </div>
+
+                <form id="candling-form" onsubmit="handleCandlingSubmit(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Active Batch</label>
+                        <select id="candling-batch-select" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Inspection Milestone</label>
+                        <select id="candling-stage" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                            <option value="Day 7">Day 7 (Fertility Check)</option>
+                            <option value="Day 14">Day 14 (Mid-Development)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Confirmed Fertile Eggs</label>
+                        <input type="number" id="candling-fertile" value="5300" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-300 mb-1">Clear / Infertile Removed</label>
+                        <input type="number" id="candling-infertile" value="250" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full bg-slate-800 hover:bg-slate-700 text-amber-400 font-bold py-2.5 rounded-xl border border-amber-400/20 text-xs transition">
+                            Save Candling Log
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- TAB 3: QUALITY & BIOSECURITY -->
+        <div id="content-biosecurity" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Daily Sanitation Checklist -->
+                <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-4 lg:col-span-1">
+                    <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+                            <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white">Sanitation Checklist</h3>
+                            <p class="text-xs text-slate-400">Daily biosecurity protocol compliance</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5 text-xs">
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer">
+                            <input type="checkbox" checked class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700 focus:ring-amber-400">
+                            <span class="text-slate-200">Disinfect Setter Trays & Baskets</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer">
+                            <input type="checkbox" checked class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700 focus:ring-amber-400">
+                            <span class="text-slate-200">Personnel Footbath Chemical Level Check</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer">
+                            <input type="checkbox" checked class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700 focus:ring-amber-400">
+                            <span class="text-slate-200">Air Intake Filter Inspection & Vacuuming</span>
+                        </label>
+                        <label class="flex items-center gap-3 p-3 rounded-xl bg-slate-900/80 border border-slate-800 cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 rounded text-amber-500 bg-slate-950 border-slate-700 focus:ring-amber-400">
+                            <span class="text-slate-200">Post-Hatch Room High-Pressure Wash</span>
+                        </label>
+                    </div>
+
+                    <button onclick="alert('Biosecurity checklist saved!')" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-2 rounded-xl text-xs transition">
+                        Sign Off Compliance Today
+                    </button>
+                </div>
+
+                <!-- Unhatched Egg Break-Open Diagnostic Engine -->
+                <div class="glass-card p-6 rounded-2xl border-slate-800 lg:col-span-2 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div>
+                            <h3 class="font-bold text-white flex items-center gap-2">
+                                <i data-lucide="microscope" class="w-5 h-5 text-amber-400"></i> Break-Open Unhatched Diagnostic Engine
+                            </h3>
+                            <p class="text-xs text-slate-400">Pinpoint causes for unhatched eggs to raise future hatch yields</p>
+                        </div>
+                        <span class="text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">Diagnostic Assistant</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="space-y-2">
+                            <label class="block text-xs font-semibold text-slate-300 mb-2">Select Unhatched Egg Symptom</label>
+                            
+                            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 cursor-pointer text-xs transition">
+                                <input type="radio" name="diag" value="clear" checked onclick="updateDiagnostic('clear')" class="mt-0.5 text-amber-500 bg-slate-950 border-slate-700">
+                                <div>
+                                    <div class="font-bold text-white">Clear Egg (No Blood Veins)</div>
+                                    <div class="text-slate-400 text-[11px]">Infertile rooster issue or storage chill</div>
+                                </div>
+                            </label>
+
+                            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 cursor-pointer text-xs transition">
+                                <input type="radio" name="diag" value="early" onclick="updateDiagnostic('early')" class="mt-0.5 text-amber-500 bg-slate-950 border-slate-700">
+                                <div>
+                                    <div class="font-bold text-white">Blood Ring (Days 2-4 Mortality)</div>
+                                    <div class="text-slate-400 text-[11px]">Temperature spike or rough transport</div>
+                                </div>
+                            </label>
+
+                            <label class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/40 cursor-pointer text-xs transition">
+                                <input type="radio" name="diag" value="late" onclick="updateDiagnostic('late')" class="mt-0.5 text-amber-500 bg-slate-950 border-slate-700">
+                                <div>
+                                    <div class="font-bold text-white">Fully Formed Chick Dead in Shell (Days 18-21)</div>
+                                    <div class="text-slate-400 text-[11px]">Humidity imbalance or improper turning</div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Automated Recommendation -->
+                        <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 text-amber-400 font-bold text-sm mb-2">
+                                    <i data-lucide="lightbulb" class="w-4 h-4"></i> Automated Action Recommendation
+                                </div>
+                                <div id="diag-title" class="font-bold text-white text-sm mb-1">Breeder Flock Infertility</div>
+                                <p id="diag-desc" class="text-xs text-slate-300 leading-relaxed">
+                                    High clear egg percentages indicate poor rooster-to-hen ratios at the parent flock or aged breeder stock.
+                                </p>
+                            </div>
+                            <div class="mt-4 pt-3 border-t border-amber-500/20 text-xs text-amber-300 font-semibold" id="diag-action">
+                                Action: Contact supplier farm to verify rooster mating ratio (1:10 target).
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: SALES & PERISHABLE DISPATCH -->
+        <div id="content-dispatch" class="tab-content hidden space-y-6">
+            <!-- Safe Dispatch Countdown Header -->
+            <div class="bg-gradient-to-r from-red-600 via-amber-600 to-amber-500 text-slate-950 p-5 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-slate-950/20 rounded-xl backdrop-blur">
+                        <i data-lucide="clock" class="w-6 h-6 stroke-[2.5]"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-black text-base tracking-tight">Post-Hatch Perishable Dispatch Countdown</h3>
+                        <p class="text-xs text-slate-900 font-medium">Box and dispatch day-old chicks within 12 hours for maximum survival rates.</p>
+                    </div>
+                </div>
+                <div class="bg-slate-950/80 px-4 py-2 rounded-xl text-center border border-slate-900/50">
+                    <div class="text-[10px] uppercase font-bold text-amber-400">Time Remaining in Safe Window</div>
+                    <div class="text-xl font-extrabold text-white tracking-widest">08h 14m</div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Order Booking Form -->
+                <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-4">
+                    <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+                            <i data-lucide="user-plus" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white">Book Customer Chick Order</h3>
+                            <p class="text-xs text-slate-400">Match sales with upcoming hatch dates</p>
+                        </div>
+                    </div>
+
+                    <form id="order-form" onsubmit="handleOrderSubmit(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Customer / Farm Name</label>
+                            <input type="text" id="order-customer" required placeholder="e.g. Apex Commercial Farmers" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Chick Type</label>
+                                <select id="order-type" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                                    <option value="Broilers (Cobb 500)">Broilers (Cobb 500)</option>
+                                    <option value="Layers (Hy-Line)">Layers (Hy-Line)</option>
+                                    <option value="Dual Purpose">Dual Purpose</option>
+                                    <option value="Indigenous/Local">Indigenous/Local</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-300 mb-1">Quantity</label>
+                                <input type="number" id="order-qty" value="2000" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Scheduled Hatch Date</label>
+                            <input type="date" id="order-date" required class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+
+                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl shadow-lg transition text-xs">
+                            Confirm Booking Order
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Live Orders Queue -->
+                <div class="glass-card p-6 rounded-2xl border-slate-800 lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3 mb-4">
+                            <div>
+                                <h3 class="font-bold text-white">Active Order Bookings</h3>
+                                <p class="text-xs text-slate-400">Delivery truck dispatch queue</p>
+                            </div>
+                            <span class="text-xs font-bold text-emerald-400">Live Queue</span>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs">
+                                <thead>
+                                    <tr class="uppercase text-slate-400 border-b border-slate-800 font-semibold">
+                                        <th class="pb-2">Customer</th>
+                                        <th class="pb-2">Type</th>
+                                        <th class="pb-2 text-right">Quantity</th>
+                                        <th class="pb-2">Hatch Date</th>
+                                        <th class="pb-2 text-center">Status</th>
+                                        <th class="pb-2 text-right">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="orders-table-body" class="divide-y divide-slate-800/60">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: COST & PROFIT ENGINE -->
+        <div id="content-finance" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Inputs Deck -->
+                <div class="glass-card p-6 rounded-2xl border-slate-800 space-y-4">
+                    <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                        <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+                            <i data-lucide="calculator" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-white">Unit Cost Calculator</h3>
+                            <p class="text-xs text-slate-400">Blend fixed & variable hatchery costs</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Raw Hatching Egg Cost ($)</label>
+                            <input type="number" step="0.01" id="calc-egg-cost" value="0.32" oninput="calculateFinances()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Power / Incubator Cost per Egg ($)</label>
+                            <input type="number" step="0.01" id="calc-inc-cost" value="0.08" oninput="calculateFinances()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Vaccines & Box Packaging per Chick ($)</label>
+                            <input type="number" step="0.01" id="calc-vax-cost" value="0.06" oninput="calculateFinances()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-300 mb-1">Chick Selling Price ($)</label>
+                            <input type="number" step="0.05" id="calc-sell-price" value="0.80" oninput="calculateFinances()" class="w-full px-3 py-2 bg-slate-900 border border-slate-700/80 rounded-xl text-xs text-white focus:border-amber-400 focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Output Card -->
+                <div class="glass-card p-6 rounded-2xl border-slate-800 lg:col-span-2 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-white mb-4">Unit Profit & Financial Margin Breakdown</h3>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                            <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800">
+                                <span class="text-xs text-slate-400 font-medium block">Total Cost / Chick</span>
+                                <span class="text-2xl font-black text-white" id="res-cost-per-chick">$0.52</span>
+                            </div>
+
+                            <div class="bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20">
+                                <span class="text-xs text-emerald-400 font-medium block">Net Profit / Chick</span>
+                                <span class="text-2xl font-black text-emerald-400" id="res-profit-per-chick">$0.28</span>
+                            </div>
+
+                            <div class="bg-purple-500/10 p-4 rounded-xl border border-purple-500/20">
+                                <span class="text-xs text-purple-400 font-medium block">Net Profit Margin</span>
+                                <span class="text-2xl font-black text-purple-300" id="res-margin-pct">35.0%</span>
+                            </div>
+                        </div>
+
+                        <!-- Cost Share Bar -->
+                        <div class="space-y-2">
+                            <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Unit Cost Allocation vs Profit</div>
+                            <div class="h-6 w-full bg-slate-900 rounded-full overflow-hidden flex p-0.5 border border-slate-800" id="finance-progress-bar">
+                                <div id="bar-egg" class="bg-amber-500 h-full text-[10px] text-slate-950 flex items-center justify-center font-bold rounded-l-full" style="width: 45%">Egg</div>
+                                <div id="bar-power" class="bg-blue-500 h-full text-[10px] text-white flex items-center justify-center font-bold" style="width: 12%">Power</div>
+                                <div id="bar-vax" class="bg-purple-500 h-full text-[10px] text-white flex items-center justify-center font-bold" style="width: 8%">Vax</div>
+                                <div id="bar-profit" class="bg-emerald-500 h-full text-[10px] text-slate-950 flex items-center justify-center font-bold rounded-r-full" style="width: 35%">Profit</div>
+                            </div>
+                            <div class="flex flex-wrap gap-4 text-xs text-slate-400 justify-center pt-2">
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-amber-500"></span> Raw Egg</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-blue-500"></span> Incubation Power</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-purple-500"></span> Vaccines/Box</span>
+                                <span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full bg-emerald-500"></span> Net Profit Margin</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+                        <span>Base calculation assumed standard 85% hatchability yield.</span>
+                        <span class="text-amber-400 font-bold">Estimated Batch Revenue: ~$4,800 / batch</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Guide Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card bg-slate-900/95 rounded-2xl max-w-lg w-full p-6 border-slate-800 relative space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl">
+            <button onclick="toggleModal('helpModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-3">
+                <div class="p-2.5 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20">
+                    <i data-lucide="book-open" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-white text-lg">HatchPulse Quick Manual</h3>
+                    <p class="text-xs text-slate-400">Optimized for high-yield hatchery operations</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+                <div class="flex items-start gap-3 p-2 bg-slate-900 rounded-xl">
+                    <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">1</span>
+                    <div><strong class="text-white">Egg Intake:</strong> Log supplier shipments, run quality filters for cracked/dirty eggs, and auto-calculate usable setter eggs.</div>
+                </div>
+                <div class="flex items-start gap-3 p-2 bg-slate-900 rounded-xl">
+                    <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">2</span>
+                    <div><strong class="text-white">Incubation:</strong> Track 21-day progress, test live climate telemetry alarms, and record candling fertility logs.</div>
+                </div>
+                <div class="flex items-start gap-3 p-2 bg-slate-900 rounded-xl">
+                    <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">3</span>
+                    <div><strong class="text-white">Biosecurity & Quality:</strong> Perform daily sanitation checklists and break open unhatched eggs to diagnose temperature or humidity issues.</div>
+                </div>
+                <div class="flex items-start gap-3 p-2 bg-slate-900 rounded-xl">
+                    <span class="w-5 h-5 rounded-full bg-amber-500 text-slate-950 font-bold flex items-center justify-center text-[10px] flex-shrink-0 mt-0.5">4</span>
+                    <div><strong class="text-white">Sales & Costs:</strong> Match order bookings to hatch dates, manage the 12-hour dispatch countdown, and calculate cost per chick.</div>
+                </div>
+            </div>
+
+            <button onclick="toggleModal('helpModal')" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2.5 rounded-xl transition text-xs">
+                Close & Return to App
+            </button>
+        </div>
+    </div>
+
+    <!-- Application Logic Script -->
+    <script>
+        // Core State Store
+        const state = {
+            telemetry: {
+                temp: 37.5,
+                humidity: 55
+            },
+            batches: [
+                { id: "HP-2026-B1", supplier: "Heritage Parent Stock Ltd.", day: 20, totalEggs: 6000, usableEggs: 5910, phase: "Hatcher Transfer", fertileCount: 5600, status: "Ready to Hatch" },
+                { id: "HP-2026-B2", supplier: "Highland Breeder Farms", day: 14, totalEggs: 5000, usableEggs: 4920, phase: "Setter Phase", fertileCount: 4650, status: "Normal Turning" },
+                { id: "HP-2026-B3", supplier: "Sunrise Agro Feeders", day: 5, totalEggs: 7000, usableEggs: 6850, phase: "Setter Phase", fertileCount: 6500, status: "Early Incubation" }
+            ],
+            orders: [
+                { id: "ORD-901", customer: "Apex Commercial Farmers", type: "Broilers (Cobb 500)", qty: 3500, date: "2026-09-22", status: "Ready to Ship" },
+                { id: "ORD-902", customer: "Valley Layer Producers", type: "Layers (Hy-Line)", qty: 1500, date: "2026-09-24", status: "Booked" },
+                { id: "ORD-903", customer: "Regional Hatchery Co-op", type: "Broilers (Cobb 500)", qty: 4000, date: "2026-09-28", status: "Booked" }
+            ]
+        };
+
+        // Initialize Lucide Icons & Components on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderDashboardBatches();
+            renderIntakeTable();
+            renderIncubationBatches();
+            renderOrdersTable();
+            populateSelects();
+            calculateUsableEggs();
+            calculateFinances();
+        });
+
+        // Tab Navigation Mechanism
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(el => {
+                el.classList.remove('bg-amber-500', 'text-slate-950', 'shadow-md', 'shadow-amber-500/10');
+                el.classList.add('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
+            });
+
+            document.getElementById(`content-${tabId}`).classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            activeTab.classList.add('bg-amber-500', 'text-slate-950', 'shadow-md', 'shadow-amber-500/10');
+            activeTab.classList.remove('text-slate-400', 'hover:text-slate-200', 'hover:bg-slate-800/60');
+        }
+
+        // Modal Handler
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.toggle('hidden');
+        }
+
+        // Egg Intake & Supplier Management Logic
+        function calculateUsableEggs() {
+            const total = parseInt(document.getElementById('intake-total-eggs').value) || 0;
+            const cracked = parseInt(document.getElementById('intake-cracked').value) || 0;
+            const dirty = parseInt(document.getElementById('intake-dirty').value) || 0;
+            const usable = Math.max(0, total - (cracked + dirty));
+            document.getElementById('intake-usable-count').textContent = usable.toLocaleString();
+        }
+
+        function handleIntakeSubmit(e) {
+            e.preventDefault();
+            const batchId = document.getElementById('intake-batch-id').value;
+            const supplier = document.getElementById('intake-supplier').value;
+            const total = parseInt(document.getElementById('intake-total-eggs').value);
+            const cracked = parseInt(document.getElementById('intake-cracked').value) || 0;
+            const dirty = parseInt(document.getElementById('intake-dirty').value) || 0;
+            const usable = total - (cracked + dirty);
+
+            state.batches.unshift({
+                id: batchId,
+                supplier: supplier,
+                day: 1,
+                totalEggs: total,
+                usableEggs: usable,
+                phase: "Setter Phase",
+                fertileCount: usable,
+                status: "Just Trayed"
+            });
+
+            renderIntakeTable();
+            renderIncubationBatches();
+            renderDashboardBatches();
+            populateSelects();
+
+            alert(`Batch ${batchId} saved! ${usable.toLocaleString()} eggs transferred to Setter #1.`);
+            document.getElementById('intake-form').reset();
+            calculateUsableEggs();
+        }
+
+        function renderIntakeTable() {
+            const tbody = document.getElementById('intake-table-body');
+            tbody.innerHTML = state.batches.map(b => {
+                const rejPct = (((b.totalEggs - b.usableEggs) / b.totalEggs) * 100).toFixed(1);
+                return `
+                    <tr class="hover:bg-slate-900/40 transition">
+                        <td class="py-3 font-bold text-white">${b.id}</td>
+                        <td class="py-3 text-slate-300">${b.supplier}</td>
+                        <td class="py-3 text-right text-slate-400">${b.totalEggs.toLocaleString()}</td>
+                        <td class="py-3 text-right font-bold text-emerald-400">${b.usableEggs.toLocaleString()}</td>
+                        <td class="py-3 text-center">
+                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${rejPct > 2.5 ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-slate-800 text-slate-300'}">
+                                ${rejPct}%
+                            </span>
+                        </td>
+                        <td class="py-3 text-right">
+                            <span class="px-2.5 py-1 text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded-full">
+                                ${b.phase}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // IoT Sensor Telemetry Simulator Controls
+        function adjustTemp(delta) {
+            state.telemetry.temp = parseFloat((state.telemetry.temp + delta).toFixed(1));
+            updateTelemetryDisplay();
+        }
+
+        function adjustHumidity(delta) {
+            state.telemetry.humidity = Math.max(20, Math.min(90, state.telemetry.humidity + delta));
+            updateTelemetryDisplay();
+        }
+
+        function resetTelemetry() {
+            state.telemetry.temp = 37.5;
+            state.telemetry.humidity = 55;
+            updateTelemetryDisplay();
+        }
+
+        function updateTelemetryDisplay() {
+            document.getElementById('telemetry-temp-val').textContent = `${state.telemetry.temp}°C`;
+            document.getElementById('telemetry-hum-val').textContent = `${state.telemetry.humidity}%`;
+            document.getElementById('dash-telemetry-text').textContent = `${state.telemetry.temp}°C / ${state.telemetry.humidity}%`;
+
+            const alertBanner = document.getElementById('telemetry-alert-banner');
+            const alertText = document.getElementById('telemetry-alert-text');
+            const dashBadge = document.getElementById('dash-telemetry-badge');
+
+            if (state.telemetry.temp > 38.2 || state.telemetry.temp < 36.8) {
+                alertBanner.className = "p-4 rounded-xl border flex items-center gap-3 bg-red-500/10 border-red-500/30 text-red-400";
+                alertText.textContent = `EMERGENCY ALERT: Incubator temperature (${state.telemetry.temp}°C) exceeds safety threshold (37.2°C - 37.8°C)! Backup generator/thermostat triggered.`;
+                alertBanner.classList.remove('hidden');
+                dashBadge.className = "px-2 py-0.5 text-xs font-bold bg-red-500/20 text-red-400 border border-red-500/30 rounded-full";
+                dashBadge.textContent = "Temp Alarm";
+            } else if (state.telemetry.humidity < 45 || state.telemetry.humidity > 65) {
+                alertBanner.className = "p-4 rounded-xl border flex items-center gap-3 bg-amber-500/10 border-amber-500/30 text-amber-400";
+                alertText.textContent = `HUMIDITY WARNING: Current humidity (${state.telemetry.humidity}%) stumbles from target 55%. Adjust fogger valves.`;
+                alertBanner.classList.remove('hidden');
+                dashBadge.className = "px-2 py-0.5 text-xs font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 rounded-full";
+                dashBadge.textContent = "Humidity Warning";
+            } else {
+                alertBanner.classList.add('hidden');
+                dashBadge.className = "px-2 py-0.5 text-xs font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-full";
+                dashBadge.textContent = "Optimal";
+            }
+        }
+
+        function renderIncubationBatches() {
+            const container = document.getElementById('incubation-batches-container');
+            container.innerHTML = state.batches.map(b => {
+                const progressPct = Math.min(100, Math.round((b.day / 21) * 100));
+                const isHatcher = b.day >= 19;
+
+                return `
+                    <div class="glass-card p-5 rounded-2xl border-slate-800 space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                            <div>
+                                <span class="font-extrabold text-white text-base">${b.id}</span>
+                                <span class="text-xs text-slate-400 ml-2">Supplier: ${b.supplier}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-1 text-xs font-bold rounded-full ${isHatcher ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
+                                    ${b.phase} (Day ${b.day}/21)
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- 21-Day Lifecycle Bar -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span class="text-slate-400">Day 1 (Setter)</span>
+                                <span class="text-amber-400 font-bold">Day ${b.day} of 21 Days</span>
+                                <span class="text-slate-400">Day 21 (Hatch)</span>
+                            </div>
+                            <div class="w-full h-3 bg-slate-900 rounded-full overflow-hidden p-0.5 border border-slate-800">
+                                <div class="bg-gradient-to-r from-amber-500 to-amber-400 h-full rounded-full transition-all duration-500" style="width: ${progressPct}%"></div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-3 gap-2 pt-1 text-center text-xs">
+                            <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">Active Eggs</span>
+                                <span class="font-bold text-white">${b.usableEggs.toLocaleString()}</span>
+                            </div>
+                            <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">Fertility Rate</span>
+                                <span class="font-bold text-emerald-400">${Math.round((b.fertileCount / b.usableEggs) * 100)}%</span>
+                            </div>
+                            <div class="p-2 bg-slate-900/60 rounded-xl border border-slate-800">
+                                <span class="text-slate-400 block text-[10px]">Hatch Countdown</span>
+                                <span class="font-bold text-amber-400">${21 - b.day} Days Left</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function handleCandlingSubmit(e) {
+            e.preventDefault();
+            const batchId = document.getElementById('candling-batch-select').value;
+            const fertile = parseInt(document.getElementById('candling-fertile').value);
+            
+            const batch = state.batches.find(b => b.id === batchId);
+            if (batch) {
+                batch.fertileCount = fertile;
+                renderIncubationBatches();
+                renderDashboardBatches();
+                alert(`Candling log updated for ${batchId}! Confirmed fertile eggs: ${fertile.toLocaleString()}`);
+            }
+        }
+
+        // Diagnostics Assistant Info
+        const diagInfo = {
+            clear: {
+                title: "Breeder Flock Infertility",
+                desc: "High clear egg percentages indicate poor rooster-to-hen ratios at the parent flock or aged breeder stock.",
+                action: "Action: Contact supplier farm to verify rooster mating ratio (1:10 target)."
+            },
+            early: {
+                title: "Early Embryonic Thermal Shock",
+                desc: "Blood rings during Days 2-4 indicate temperature spikes inside Setter #1 or excessive egg cooling during transport.",
+                action: "Action: Recalibrate incubator thermostat sensors and verify transport insulation."
+            },
+            late: {
+                title: "Late Mortality / Humidity Imbalance",
+                desc: "Chicks fully formed but dead in shell point to low humidity during hatching or improper egg turning angles.",
+                action: "Action: Elevate relative humidity to 65% during Days 19-21 in Hatcher #2."
+            }
+        };
+
+        function updateDiagnostic(type) {
+            const data = diagInfo[type];
+            document.getElementById('diag-title').textContent = data.title;
+            document.getElementById('diag-desc').textContent = data.desc;
+            document.getElementById('diag-action').textContent = data.action;
+        }
+
+        // Customer Order Booking & Dispatch
+        function handleOrderSubmit(e) {
+            e.preventDefault();
+            const customer = document.getElementById('order-customer').value;
+            const type = document.getElementById('order-type').value;
+            const qty = parseInt(document.getElementById('order-qty').value);
+            const date = document.getElementById('order-date').value;
+
+            state.orders.unshift({
+                id: `ORD-${Math.floor(100 + Math.random() * 900)}`,
+                customer,
+                type,
+                qty,
+                date,
+                status: "Booked"
+            });
+
+            renderOrdersTable();
+            document.getElementById('order-form').reset();
+            alert(`Order successfully registered for ${customer}!`);
+        }
+
+        function renderOrdersTable() {
+            const tbody = document.getElementById('orders-table-body');
+            tbody.innerHTML = state.orders.map(o => `
+                <tr class="hover:bg-slate-900/40 transition">
+                    <td class="py-3 font-bold text-white">${o.customer}</td>
+                    <td class="py-3 text-slate-300">${o.type}</td>
+                    <td class="py-3 text-right font-bold text-amber-400">${o.qty.toLocaleString()}</td>
+                    <td class="py-3 text-slate-400 text-xs">${o.date}</td>
+                    <td class="py-3 text-center">
+                        <span class="px-2.5 py-1 text-[10px] font-bold rounded-full ${o.status === 'Ready to Ship' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-blue-500/20 text-blue-300 border border-blue-500/30'}">
+                            ${o.status}
+                        </span>
+                    </td>
+                    <td class="py-3 text-right">
+                        ${o.status === 'Ready to Ship' ? 
+                            `<button onclick="dispatchOrder('${o.id}')" class="px-3 py-1 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs hover:bg-emerald-400 transition">Dispatch</button>` : 
+                            `<span class="text-xs text-slate-500">Scheduled</span>`
+                        }
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function dispatchOrder(id) {
+            const order = state.orders.find(o => o.id === id);
+            if (order) {
+                order.status = "Dispatched";
+                renderOrdersTable();
+                alert(`Order ${id} marked as Dispatched! Delivery truck loaded.`);
+            }
+        }
+
+        // Cost & Profit Engine Calculator
+        function calculateFinances() {
+            const eggCost = parseFloat(document.getElementById('calc-egg-cost').value) || 0;
+            const incCost = parseFloat(document.getElementById('calc-inc-cost').value) || 0;
+            const vaxCost = parseFloat(document.getElementById('calc-vax-cost').value) || 0;
+            const sellPrice = parseFloat(document.getElementById('calc-sell-price').value) || 0;
+
+            // Factoring 85% hatchability rate on raw egg cost
+            const effectiveEggCost = eggCost / 0.85;
+            const totalCostPerChick = effectiveEggCost + incCost + vaxCost;
+            const netProfit = sellPrice - totalCostPerChick;
+            const marginPct = sellPrice > 0 ? ((netProfit / sellPrice) * 100).toFixed(1) : 0;
+
+            document.getElementById('res-cost-per-chick').textContent = `$${totalCostPerChick.toFixed(2)}`;
+            document.getElementById('res-profit-per-chick').textContent = `$${netProfit.toFixed(2)}`;
+            document.getElementById('res-margin-pct').textContent = `${marginPct}%`;
+            document.getElementById('dash-profit-margin').textContent = `${marginPct}%`;
+
+            if (sellPrice > 0) {
+                const eggW = Math.max(5, (effectiveEggCost / sellPrice) * 100);
+                const incW = Math.max(5, (incCost / sellPrice) * 100);
+                const vaxW = Math.max(5, (vaxCost / sellPrice) * 100);
+                const profW = Math.max(0, 100 - (eggW + incW + vaxW));
+
+                document.getElementById('bar-egg').style.width = `${eggW}%`;
+                document.getElementById('bar-power').style.width = `${incW}%`;
+                document.getElementById('bar-vax').style.width = `${vaxW}%`;
+                document.getElementById('bar-profit').style.width = `${profW}%`;
+            }
+        }
+
+        // Render Dashboard Overview Cards
+        function renderDashboardBatches() {
+            document.getElementById('dash-active-count').textContent = state.batches.length;
+            const container = document.getElementById('dash-batches-container');
+            
+            container.innerHTML = state.batches.slice(0, 3).map(b => `
+                <div class="flex items-center justify-between p-3.5 bg-slate-900/80 rounded-xl border border-slate-800">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 bg-amber-500/10 text-amber-400 rounded-lg border border-amber-500/20">
+                            <i data-lucide="egg" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-white text-xs">${b.id}</div>
+                            <div class="text-[11px] text-slate-400">${b.usableEggs.toLocaleString()} Eggs • ${b.phase}</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-bold text-amber-400">Day ${b.day} / 21</div>
+                        <div class="text-[10px] text-slate-500">Target: Day 21</div>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function populateSelects() {
+            const candlingSel = document.getElementById('candling-batch-select');
+            candlingSel.innerHTML = state.batches.map(b => `<option value="${b.id}">${b.id} (${b.supplier})</option>`).join('');
+        }
+    </script>
+</body>
+</html>
